@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Shop Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Sale Details Modal - Clean Design */
+        #saleDetailsModal .modal-content { max-width: 600px; }
+        .sale-details-modern { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .sale-details-modern .row { display: flex; flex-wrap: wrap; margin: 0 -6px; }
+        .sale-details-modern .col-4 { flex: 0 0 33.33%; max-width: 33.33%; padding: 0 6px; box-sizing: border-box; }
+        .sale-details-modern .g-3 { gap: 0; }
+        .sale-details-modern .mb-4 { margin-bottom: 16px; }
+        .sale-details-modern .mb-3 { margin-bottom: 12px; }
+        .sale-details-modern .p-3 { padding: 14px; }
+        .sale-details-modern .p-4 { padding: 18px; }
+        .sale-details-modern .rounded-3 { border-radius: 12px; }
+        .sale-details-modern .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .sale-details-modern .border { border: 1px solid #e8ecf0; }
+        .sale-details-modern .bg-light { background: #f8fafc; }
+        .sale-details-modern .bg-white { background: white; }
+        .sale-details-modern .text-muted { color: #64748b; }
+        .sale-details-modern .text-dark { color: #1e293b; }
+        .sale-details-modern .fw-bold { font-weight: 700; }
+        .sale-details-modern .text-uppercase { text-transform: uppercase; }
+        .sale-details-modern .text-primary { color: var(--primary); }
+        .sale-details-modern .text-success { color: #16a34a; }
+        .sale-details-modern .text-danger { color: #dc2626; }
+        
+        .info-card-modern { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .info-card-modern i { font-size: 1.2rem; }
+        .info-card-modern .extra-small { font-size: 0.65rem; letter-spacing: 0.5px; }
+        .info-card-modern .fs-7 { font-size: 0.85rem; }
+
+        .customer-info-modern { display: flex; align-items: center; }
+        .customer-info-modern .d-flex { display: flex; }
+        .customer-info-modern .align-items-center { align-items: center; }
+        .customer-info-modern .justify-content-between { justify-content: space-between; }
+        .customer-info-modern .flex-wrap { flex-wrap: wrap; }
+        .customer-info-modern .gap-3 { gap: 12px; }
+        .customer-info-modern .me-3 { margin-right: 12px; }
+        .customer-info-modern h6 { font-size: 0.9rem; margin: 0; }
+        .customer-info-modern .extra-small { font-size: 0.75rem; }
+        .customer-info-modern .rounded-pill { border-radius: 50px; padding: 6px 14px; }
+        .bg-success-light { background: #f0fdf4; border-color: #bbf7d0 !important; color: #16a34a; }
+
+        .items-section h6 { font-size: 0.75rem; color: var(--primary); margin: 0; }
+        .items-section .badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; }
+        
+        .sale-item-modern { margin-bottom: 10px; }
+        .sale-item-modern .d-flex { display: flex; }
+        .sale-item-modern .align-items-center { align-items: center; }
+        .sale-item-modern .gap-3 { gap: 12px; }
+        .sale-item-modern .flex-grow-1 { flex: 1; min-width: 0; }
+        .sale-item-modern .justify-content-between { justify-content: space-between; }
+        .sale-item-modern h6 { font-size: 0.85rem; margin: 0 0 2px; }
+        .sale-item-modern .extra-small { font-size: 0.72rem; }
+        .sale-item-modern .text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sale-item-modern hr { border: none; border-top: 1px solid #f1f5f9; margin: 8px 0; }
+        
+        .profit-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+        .profit-badge.profit-up { background: #f0fdf4; color: #16a34a; }
+        .profit-badge.profit-down { background: #fef2f2; color: #dc2626; }
+        
+        .price-steps { font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .price-steps .step-value { font-weight: 600; }
+        .price-steps .step-separator { color: #cbd5e1; }
+        .item-total-price { font-size: 1rem; }
+        .margin-label { font-size: 0.65rem; }
+        .item-badges { text-align: right; flex-shrink: 0; }
+
+        .totals-section-modern { background: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 12px; }
+        
+        .credit-split-card { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .credit-split-card .credit-side { padding: 8px 14px; text-align: center; }
+        .credit-split-card .credit-side.paid { background: #f0fdf4; }
+        .credit-split-card .credit-side.pending { background: #fef2f2; }
+        .credit-split-card .credit-label-sm { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: #64748b; }
+        .credit-split-card .credit-value-lg { font-size: 0.85rem; font-weight: 800; }
+        .text-success-dark { color: #15803d; }
+        .text-danger-dark { color: #b91c1c; }
+
+        .ls-1 { letter-spacing: 0.5px; }
+        .d-flex { display: flex; }
+        .d-inline-flex { display: inline-flex; }
+        .align-items-center { align-items: center; }
+        .justify-content-between { justify-content: space-between; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .me-1 { margin-right: 4px; }
+        .me-2 { margin-right: 8px; }
+        .mt-1 { margin-top: 4px; }
+        .mt-2 { margin-top: 8px; }
+        .pt-3 { padding-top: 12px; }
+        .border-top { border-top: 1px solid #e2e8f0; }
+        .border-2 { border-width: 2px !important; }
+        .h5 { font-size: 1.1rem; }
+        .small { font-size: 0.8rem; }
+        .extra-small { font-size: 0.72rem; }
+        .opacity-10 { opacity: 0.1; }
+        .mob-column { flex-wrap: wrap; }
+
+        @media (max-width: 576px) {
+            .sale-details-modern .col-4 { flex: 0 0 33.33%; }
+            .info-card-modern { padding: 10px 6px !important; }
+            .info-card-modern .fs-7 { font-size: 0.75rem; }
+            .sale-item-modern .mob-column { flex-direction: column; align-items: flex-start !important; }
+            .item-badges { text-align: left; margin-top: 4px; }
+        }
+    </style>
+</head>
+
+<body class="sales-page">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-store"></i> <span id="shopNameHeader">Shop Name</span></h2>
+            <div class="user-info">
+                <div class="user-name" id="userName">Loading...</div>
+                <div class="user-role" id="userRole">Shop Admin</div>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <!-- Menu items will be loaded dynamically by MenuManager -->
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <nav class="navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h3>Report</h3>
+            </div>
+            <div class="navbar-right">
+                <button class="btn btn-success btn-action" id="exportExcelBtn">
+                    <i class="fas fa-file-excel"></i> Excel
+                </button>
+                <button class="btn btn-danger btn-action" id="exportPdfBtn">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <!-- Date Filters -->
+            <div class="filter-section">
+                <div class="welcome-header">
+                    <div class="welcome-text">
+                        <p><i class="fas fa-filter"></i> Filter report data by selecting a date range.</p>
+                    </div>
+                    <div class="time-filter">
+                        <div class="select-wrapper">
+                            <i class="fas fa-calendar-alt filter-icon"></i>
+                            <select id="timeRangeFilter" class="form-control filter-select">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Date Range</option>
+                            </select>
+                        </div>
+                        <div id="customDateRange" class="custom-date-inputs" style="display: none;">
+                            <input type="text" id="fromDate" class="form-control date-input datepicker"
+                                placeholder="From">
+                            <input type="text" id="toDate" class="form-control date-input datepicker" placeholder="To">
+                            <button id="applyDateFilter"
+                                class="btn btn-primary btn-action btn-sm btn-narrow">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Statistics -->
+            <div class="sales-stats">
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Sales</h3>
+                        <div class="value" id="totalSalesAmount">0</div>
+                        <div class="change" id="salesChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon danger">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Orders</h3>
+                        <div class="value" id="totalOrders">0</div>
+                        <div class="change" id="ordersChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Credit Sales</h3>
+                        <div class="value" id="creditSales">0</div>
+                        <div class="change" id="creditChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Average Order Value</h3>
+                        <div class="value" id="averageOrder">0</div>
+                        <div class="change" id="avgOrderChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Cash Sales</h3>
+                        <div class="value" id="cashSales">0</div>
+                        <div class="change" id="cashChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon danger">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Cost</h3>
+                        <div class="value" id="totalCost">0</div>
+                        <div class="change" id="costChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Profit</h3>
+                        <div class="value" id="totalProfit">0</div>
+                        <div class="change" id="profitChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Net Margin</h3>
+                        <div class="value" id="profitMargin">0%</div>
+                        <div class="change" id="marginChange">+0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="chart-section">
+                <div class="chart-container-modern">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line"></i> Daily Sales Trend</h4>
+                        <select id="chartMetric" class="form-control" style="width: auto;">
+                            <option value="total_amount">Total Sales</option>
+                            <option value="total_orders">Total Orders</option>
+                            <option value="profit_amount">Total Profit</option>
+                            <option value="cost_amount">Total Cost</option>
+                            <option value="profit_margin">Profit Margin %</option>
+                            <option value="credit_sales">Credit Sales</option>
+                            <option value="average_order">Average Order Value</option>
+                        </select>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container-modern">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-pie"></i> Payment Methods</h4>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="paymentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="fas fa-list"></i> Sales Transactions
+                    </div>
+                    <div class="table-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="salesSearch" placeholder="Search transactions...">
+                        </div>
+                        <button class="btn btn-secondary btn-action" id="refreshSales">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="selectAllSales">
+                            </th>
+                            <th>Invoice #</th>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Products</th>
+                            <th>Quantity</th>
+                            <th>Buy Price</th>
+                            <th>Total Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Sold By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTable">
+                        <tr>
+                            <td colspan="10" class="text-center">Loading sales data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination" id="salesPagination">
+                    <button class="btn btn-sm btn-action" id="prevPage">Previous</button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button class="btn btn-sm btn-action" id="nextPage">Next</button>
+                </div>
+            </div>
+
+            <!-- Detailed View Modal -->
+            <div class="modal" id="saleDetailsModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-receipt"></i> Sale Details - Invoice #<span id="invoiceNumber"></span></h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="saleDetailsContent">
+                            <!-- Sale details will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary btn-action close-modal">Close</button>
+                        <button class="btn btn-primary btn-action" id="printSaleBtn">
+                            <i class="fas fa-print"></i> Print Invoice
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Bulk Action Bar -->
+            <div id="bulkActionBar" class="bulk-action-bar">
+                <div class="bulk-info">
+                    <span id="selectedCount">0</span> items selected
+                </div>
+                <div class="bulk-buttons">
+                    <button class="btn btn-danger btn-action" id="bulkDeleteBtn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-secondary btn-action" id="cancelSelection">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/menu-manager.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/sales.js"></script>
+</body>
+
+</html>

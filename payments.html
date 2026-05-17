@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments & Subscriptions - Super Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .payment-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .payment-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .payment-tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .payment-tab-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .payment-tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .payment-tab-content {
+            display: none;
+        }
+
+        .payment-tab-content.active {
+            display: block;
+        }
+
+        .subscription-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .subscription-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .subscription-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .shop-name-badge {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-frozen {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-suspended {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        .status-stopped {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .subscription-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .subscription-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .qr-code-preview {
+            max-width: 300px;
+            margin: 20px 0;
+        }
+
+        .qr-code-preview img {
+            width: 100%;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .payment-method-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+        }
+
+        .notification-preview {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .action-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-freeze {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .action-freeze:hover {
+            background: #bfdbfe;
+        }
+
+        .action-suspend {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        .action-suspend:hover {
+            background: #ddd6fe;
+        }
+
+        .action-stop {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-stop:hover {
+            background: #fecaca;
+        }
+
+        .action-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .action-warning:hover {
+            background: #fde68a;
+        }
+
+        .action-activate {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .action-activate:hover {
+            background: #a7f3d0;
+        }
+    </style>
+</head>
+
+<body class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-crown"></i> Super Admin</h2>
+            <div class="shop-info">
+                <div class="user-name" id="userName">Super Admin</div>
+                <div class="user-role">Administrator</div>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <!-- Menu items will be loaded dynamically by MenuManager -->
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="navbar-left">
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h3><i class="fas fa-wallet"></i> Payments & Subscriptions</h3>
+            </div>
+            <div class="navbar-right">
+                <div class="user-menu">
+                    <div class="user-avatar" id="userAvatar">SA</div>
+                    <div class="user-details">
+                        <div class="user-fullname" id="userFullName">Super Admin</div>
+                        <div class="user-email" id="userEmail">admin@system.com</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Statistics Cards -->
+            <div class="payment-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon sales">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Revenue</h3>
+                        <div class="value" id="totalRevenue">₹0.00</div>
+                        <div class="change positive">All Time</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Due Payments</h3>
+                        <div class="value" id="duePayments">₹0.00</div>
+                        <div class="change warning" id="dueShopsCount">0 Shops</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Active Subscriptions</h3>
+                        <div class="value" id="activeSubscriptions">0</div>
+                        <div class="change positive">Active Shops</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon danger">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Overdue</h3>
+                        <div class="value" id="overdueCount">0</div>
+                        <div class="change negative">Pending</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="payment-tabs">
+                <button class="payment-tab-btn active" data-tab="subscriptions">
+                    <i class="fas fa-list"></i> Subscriptions
+                </button>
+                <button class="payment-tab-btn" data-tab="transactions">
+                    <i class="fas fa-file-invoice-dollar"></i> Transactions
+                </button>
+                <button class="payment-tab-btn" data-tab="settings">
+                    <i class="fas fa-cog"></i> Payment Settings
+                </button>
+                <button class="payment-tab-btn" data-tab="actions">
+                    <i class="fas fa-bolt"></i> Shop Actions
+                </button>
+                <button class="payment-tab-btn" data-tab="notifications">
+                    <i class="fas fa-bell"></i> Notifications
+                </button>
+            </div>
+
+            <!-- Subscriptions Tab -->
+            <div class="payment-tab-content active" id="subscriptions">
+                <div class="section-header">
+                    <h2><i class="fas fa-receipt"></i> Manage Subscriptions</h2>
+                    <button class="btn btn-primary btn-action" id="addSubscriptionBtn">
+                        <i class="fas fa-plus"></i> Add Subscription
+                    </button>
+                </div>
+
+                <div class="filter-options" style="margin-bottom: 20px;">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="subscriptionSearch" placeholder="Search shops...">
+                    </div>
+                    <select id="statusFilter" class="form-control" style="max-width: 200px;">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="frozen">Frozen</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="stopped">Stopped</option>
+                    </select>
+                    <button class="btn btn-secondary btn-action" id="refreshSubscriptions">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div id="subscriptionsList">
+                    <div class="text-center p-3">Loading subscriptions...</div>
+                </div>
+            </div>
+
+            <!-- Transactions Tab -->
+            <div class="payment-tab-content" id="transactions">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Payment Transactions</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success btn-action" id="recordPaymentBtn">
+                            <i class="fas fa-plus"></i> Record Payment
+                        </button>
+                        <button class="btn btn-secondary btn-action" id="exportTransactionsBtn">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-options" style="margin-bottom: 20px;">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="transactionSearch" placeholder="Search transactions...">
+                    </div>
+                    <input type="date" id="transactionFromDate" class="form-control" style="max-width: 180px;">
+                    <input type="date" id="transactionToDate" class="form-control" style="max-width: 180px;">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Shop</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Reference</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable">
+                            <tr>
+                                <td colspan="7" class="text-center">Loading transactions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payment Settings Tab -->
+            <div class="payment-tab-content" id="settings">
+                <div class="section-header">
+                    <h2><i class="fas fa-cog"></i> Payment Settings</h2>
+                    <button class="btn btn-primary btn-action" id="savePaymentSettingsBtn">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+
+                <div class="settings-card">
+                    <h4><i class="fas fa-mobile-alt"></i> UPI Payment</h4>
+                    <div class="form-group">
+                        <label>Upload UPI QR Code</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="file" id="qrCodeFile" accept="image/*" class="form-control">
+                            <button class="btn btn-secondary btn-sm" id="uploadQrBtn">
+                                <i class="fas fa-upload"></i> Upload
+                            </button>
+                        </div>
+                        <div class="qr-code-preview" id="qrCodePreview" style="display: none;">
+                            <img id="qrCodeImage" src="" alt="QR Code">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>UPI ID</label>
+                            <input type="text" id="upiId" class="form-control" placeholder="merchant@upi">
+                        </div>
+                        <div class="form-group">
+                            <label>UPI Number</label>
+                            <input type="text" id="upiNumber" class="form-control" placeholder="9876543210">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>UPI Name / Display Name</label>
+                        <input type="text" id="upiName" class="form-control" placeholder="Shop Name">
+                    </div>
+                    <!-- Optional UPI QR Code could use the main one or a specific one. For now keeping it simple or reusing main -->
+
+                    <h4 style="margin-top: 30px;"><i class="fas fa-university"></i> Bank Transfer</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Bank Name</label>
+                            <input type="text" id="bankName" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Account Holder Name</label>
+                            <input type="text" id="accountHolderName" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" id="accountNumber" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>IFSC Code</label>
+                            <input type="text" id="ifscCode" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Branch Name</label>
+                        <input type="text" id="bankBranch" class="form-control">
+                    </div>
+
+                    <h4 style="margin-top: 30px;"><i class="fas fa-coins"></i> USDT / Crypto Payment</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>USDT Address</label>
+                            <input type="text" id="usdtAddress" class="form-control" placeholder="0x...">
+                        </div>
+                        <div class="form-group">
+                            <label>Network Type</label>
+                            <select id="usdtType" class="form-control">
+                                <option value="">Select Network</option>
+                                <option value="BEP20">BEP20 (BSC)</option>
+                                <option value="TRC20">TRC20 (Tron)</option>
+                                <option value="ERC20">ERC20 (Ethereum)</option>
+                                <option value="POLYGON">Polygon</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Crypto QR Code</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="file" id="usdtQrFile" accept="image/*" class="form-control">
+                            <button class="btn btn-secondary btn-sm" id="uploadUsdtQrBtn">
+                                <i class="fas fa-upload"></i> Upload
+                            </button>
+                        </div>
+                        <div class="qr-code-preview" id="usdtQrPreview" style="display: none;">
+                            <img id="usdtQrImage" src="" alt="Crypto QR">
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top: 30px;"><i class="fas fa-wallet"></i> Other Payment Methods</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Method Name / Number</label>
+                            <input type="text" id="otherPaymentNumber" class="form-control"
+                                placeholder="e.g. GPay Number, Paytm">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Details / Info</label>
+                        <textarea id="otherPaymentDetails" rows="2" class="form-control"
+                            placeholder="Additional details..."></textarea>
+                    </div>
+
+                    <h4 style="margin-top: 30px;"><i class="fas fa-phone"></i> Contact Support</h4>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="paymentPhone" class="form-control">
+                    </div>
+
+                    <h4 style="margin-top: 30px;"><i class="fas fa-info-circle"></i> General Instructions</h4>
+                    <div class="form-group">
+                        <label>Instructions for Shops</label>
+                        <textarea id="paymentInstructions" rows="3" class="form-control"
+                            placeholder="Enter any additional payment instructions..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shop Actions Tab -->
+            <div class="payment-tab-content" id="actions">
+                <div class="section-header">
+                    <h2><i class="fas fa-bolt"></i> Shop Actions</h2>
+                </div>
+
+                <div class="filter-options" style="margin-bottom: 20px;">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="actionShopSearch" placeholder="Search shops...">
+                    </div>
+                </div>
+
+                <div id="shopActionsList">
+                    <div class="text-center p-3">Loading shops...</div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="payment-tab-content" id="notifications">
+                <div class="section-header">
+                    <h2><i class="fas fa-bell"></i> Payment Notifications</h2>
+                    <button class="btn btn-primary btn-action" id="sendNotificationBtn">
+                        <i class="fas fa-paper-plane"></i> Send Notification
+                    </button>
+                </div>
+
+                <div class="filter-options" style="margin-bottom: 20px;">
+                    <select id="notificationShopFilter" class="form-control" style="max-width: 250px;">
+                        <option value="all">All Shops</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Shop</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notificationsTable">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading notifications...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Subscription Modal -->
+    <div class="modal" id="addSubscriptionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus"></i> <span id="subscriptionModalTitle">Add Subscription</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="subscriptionForm">
+                    <input type="hidden" id="subscriptionId">
+                    <div class="form-group">
+                        <label>Select Shop *</label>
+                        <select id="subscriptionShopId" class="form-control" required>
+                            <option value="">-- Select Shop --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Subscription Type *</label>
+                            <select id="subscriptionType" class="form-control" required>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                                <option value="once">One-Time</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount *</label>
+                            <input type="number" id="subscriptionAmount" class="form-control" step="0.01" min="0"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date *</label>
+                            <input type="date" id="subscriptionStartDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date (Optional)</label>
+                            <input type="date" id="subscriptionEndDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="subscriptionStatus" class="form-control">
+                            <option value="active">Active</option>
+                            <option value="frozen">Frozen</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="stopped">Stopped</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-action close-modal">Cancel</button>
+                <button class="btn btn-primary btn-action" id="saveSubscriptionBtn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div class="modal" id="recordPaymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-money-bill-wave"></i> Record Payment</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <input type="hidden" id="paymentTransactionId">
+                    <div class="form-group">
+                        <label>Select Shop *</label>
+                        <select id="paymentShopId" class="form-control" required>
+                            <option value="">-- Select Shop --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount *</label>
+                            <input type="number" id="paymentAmount" class="form-control" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Date *</label>
+                            <input type="date" id="paymentDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Payment Method *</label>
+                            <select id="paymentMethod" class="form-control" required>
+                                <option value="cash">Cash</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="upi">UPI</option>
+                                <option value="card">Card</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Transaction Reference</label>
+                            <input type="text" id="transactionReference" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="paymentNotes" rows="3" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-action close-modal">Cancel</button>
+                <button class="btn btn-primary btn-action" id="savePaymentBtn">
+                    <i class="fas fa-save"></i> Record Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Notification Modal -->
+    <div class="modal" id="sendNotificationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-paper-plane"></i> Send Notification</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="notificationForm">
+                    <div class="form-group">
+                        <label>Select Shop(s) *</label>
+                        <select id="notificationShopId" class="form-control" required>
+                            <option value="">-- Select Shop --</option>
+                            <option value="all">All Shops</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Notification Type *</label>
+                            <select id="notificationType" class="form-control" required>
+                                <option value="payment_reminder">Payment Reminder</option>
+                                <option value="payment_due">Payment Due</option>
+                                <option value="warning">Warning</option>
+                                <option value="suspension">Suspension Notice</option>
+                                <option value="freeze">Freeze Notice</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" id="notificationTitle" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Message *</label>
+                        <textarea id="notificationMessage" rows="4" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="notification-preview">
+                        <strong><i class="fas fa-eye"></i> Preview:</strong>
+                        <h5 id="previewTitle" style="margin: 10px 0 5px;">Notification Title</h5>
+                        <p id="previewMessage" style="margin: 0;">Notification message will appear here...</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-action close-modal">Cancel</button>
+                <button class="btn btn-primary btn-action" id="sendNotificationSubmitBtn">
+                    <i class="fas fa-paper-plane"></i> Send Notification
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/menu-manager.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/payments.js"></script>
+</body>
+
+</html>
