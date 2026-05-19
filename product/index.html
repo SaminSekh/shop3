@@ -9,7 +9,7 @@
     <link rel="icon" href="about:blank" type="image/x-icon">
     <link rel="stylesheet" href="https://store.socox.in/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="https://store.socox.in/manifest.json">
+    <!-- Manifest will be generated dynamically by JS for same-origin compliance -->
 
     <!-- ================= COMMON SEO (GLOBAL) ================= -->
 
@@ -21,12 +21,12 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <!-- Canonical (can be same or dynamically updated later) -->
-    <link rel="canonical" href="https://www.yoursite.com/">
+    <link rel="canonical" href="https://shop.socox.in/">
 
     <!-- Open Graph (Common / Global) -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Shop Management System">
-    <meta property="og:url" content="https://www.yoursite.com/">
+    <meta property="og:url" content="https://shop.socox.in/">
 
     <!-- Twitter Card (Common / Global) -->
     <meta name="twitter:card" content="summary_large_image">
@@ -37,17 +37,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('SW Registered!', reg);
-                }).catch(err => {
-                    console.log('SW Registration failed:', err);
-                });
-            });
-        }
-    </script>
+    <!-- Service Worker handled by dynamic manifest -->
     <style>
         :root {
             --public-primary: #0f642600;
@@ -1961,8 +1951,8 @@
     <div id="overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500;">
     </div>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="../js/supabase-config.js"></script>
-    <script src="../js/shop-products.js"></script>
+    <script src="https://store.socox.in/js/supabase-config.js"></script>
+    <script src="https://store.socox.in/js/shop-products.js"></script>
 
     <!-- Product Sharing Logic -->
     <script>
